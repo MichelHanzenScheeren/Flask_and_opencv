@@ -71,7 +71,8 @@ class Webcam():
         copy = self.get_webcam_image()
       return self.draw_and_convert_frame(copy)
     except:
-      return ImagePack.convert_to_bytes(ImagePack.black_image())
+      black = ImagePack.black_image(self.video_capture.proporcional_size)
+      return ImagePack.convert_to_bytes(black)
   
 
   def get_webcam_image(self):
@@ -113,8 +114,8 @@ class Webcam():
     if image is None:
       return
     frame = ImagePack.convert_to_frame(image)
-    video_dimensions = self.video_capture.get_video_dimensions()
-    new_image = ImagePack.resize_image(frame, video_dimensions)
+    dimensions = self.video_capture.proporcional_size
+    new_image = ImagePack.resize_image(frame, dimensions)
     self.uploaded_frame.set_frame(new_image)
   
 

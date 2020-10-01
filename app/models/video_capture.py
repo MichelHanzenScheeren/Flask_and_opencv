@@ -1,11 +1,13 @@
 from threading import Lock
 from app.models.image_pack import ImagePack
 
+
 class VideoCapture:
   def __init__(self):
     self._is_working = True
     self.video_capture = None
     self.lock_video = Lock()
+    self.proporcional_size = [480, 640]
   
 
   def start_video(self, port):
@@ -32,10 +34,12 @@ class VideoCapture:
 
   def define_resolution(self):
     with self.lock_video:
-      if(self.video_capture.get(3) != 640 or self.video_capture.get(4) != 480):
-        self.video_capture.set(3, 640)
-        self.video_capture.set(4, 480)
-  
+      h, w = ImagePack.force_max_resolution(self.video_capture)
+      if h <= 480 and w <= 640:
+        return
+      proportion = 720 / w
+      self.proporcional_size = (int(h * proportion), int(w * proportion))
+
 
   def set_working_state(self, condition = True):
     with self.lock_video:
@@ -43,32 +47,32 @@ class VideoCapture:
   
 
   def video_status(self):
-    if not self.is_valid():
-      h, w, success = (480, 640, False)
-      self.set_working_state(False)
-    else:
-      h, w = self.get_video_dimensions()
-      _ = self.capture_frame() # Necessário para verificação do funcionamento
-      success = self.is_working()
+    h, w = self.proporcional_size
+    _ = self.capture_frame() # Necessário para verificação do funcionamento
+    success = self.is_working()
     return (h, w, success)
-  
-
-  def get_video_dimensions(self):
-    with self.lock_video:
-      return (int(self.video_capture.get(4)), int(self.video_capture.get(3)))
   
 
   def capture_frame(self):
     if(self.is_working() and self.is_valid()):
       return self._do_capture()
-    return ImagePack.black_image()
+    return ImagePack.black_image(self.proporcional_size)
   
 
   def _do_capture(self):
     with self.lock_video:
       success, frame = self.video_capture.read()
     self.set_working_state(success)
-    return frame if success else ImagePack.black_image()
+    if success:
+      return self._resize_capture(frame) 
+    else:
+      return ImagePack.black_image(self.proporcional_size)
+  
+
+  def _resize_capture(self, frame):
+    if(self.video_capture.get(3) <= 640 and self.video_capture.get(4) <= 480):
+      return frame
+    return ImagePack.resize_image(frame, self.proporcional_size)
 
 
   def change(self, new_port):

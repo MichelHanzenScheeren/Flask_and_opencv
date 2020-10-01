@@ -44,8 +44,17 @@ class ImagePack():
 	
 
 	@staticmethod
-	def black_image():
-		return numpy.zeros((480, 640, 3), numpy.uint8)
+	def force_max_resolution(video):
+		video.set(cv2.CAP_PROP_FRAME_WIDTH, 10000) # forçar resolução máxima 
+		video.set(cv2.CAP_PROP_FRAME_HEIGHT, 10000) # forçar resolução máxima 
+		print(f'MAX_RESOLUTION: {int(video.get(3))} X {int(video.get(4))}')
+		return (video.get(4), video.get(3))
+	
+
+	@staticmethod
+	def black_image(size):
+		h, w = size
+		return numpy.zeros((h, w, 3), numpy.uint8)
 	
 
 	@staticmethod
