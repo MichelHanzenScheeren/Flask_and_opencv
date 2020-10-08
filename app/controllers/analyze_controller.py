@@ -6,6 +6,11 @@ def configure_routes(app, webcam, analyze):
   def get_differentiator():
     analyze.clear()
     return analyze.calculate_differentiator(webcam.get_differentiator_image)
+  
+
+  @app.route('/get_differentiator_image', methods=['POST'])
+  def get_differentiator_image():
+    return Response(analyze.results.get_differentiator_image())
 
 
   @app.route('/start_analysis', methods=['POST'])
@@ -26,11 +31,6 @@ def configure_routes(app, webcam, analyze):
       return render_template('results.html', results = analyze.results, page='results')
     except:
       return redirect(url_for('error'))
-    
-
-  @app.route('/get_differentiator_image', methods=['POST'])
-  def get_differentiator_image():
-    return Response(analyze.results.get_differentiator_image())
   
 
   @app.route('/get_all_images', methods=['POST'])

@@ -14,8 +14,8 @@ textarea.my-textarea {
     resize: none;
 }
 img.my-img {
-    max-height:145px;
-    max-width:260px;
+    max-height:140px;
+    max-width:230px;
     height:auto;
     width:auto;
 }
