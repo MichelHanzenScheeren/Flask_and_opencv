@@ -18,10 +18,10 @@ class Webcam():
     self.video_capture.start_video(self.current_port)
   
 
-  def video_status(self):
-    h, w, success = self.video_capture.video_status()
-    return {'style': f'height:{h}px;min-height:{h}px;width:{w}px;min-width:{w}px;',
-        'success': success, 'current': self.current_port}
+  def video_status_and_port(self):
+    status = self.video_capture.video_status()
+    status['current'] = self.current_port
+    return status
   
 
   def webcans_list(self):
@@ -39,7 +39,8 @@ class Webcam():
   def change_current_webcam(self, index):
     if self.is_invalid_index(index):
       return ''
-    self.webcam_port = index
+    self.clear_rectangle_and_uploaded_image()
+    self.current_port = index
     return self.video_capture.change(index)
   
 
@@ -125,13 +126,10 @@ class Webcam():
   
 
   def clear(self):
-    self.turn_off_webcam()
-    self.clear_rectangle_and_uploaded_image()
-  
-
-  def turn_off_webcam(self):
     self.video_capture.turn_off()
+    self.clear_rectangle_and_uploaded_image()
 
 
   def __del__(self):
-    self.turn_off_webcam()
+    self.video_capture.turn_off()
+

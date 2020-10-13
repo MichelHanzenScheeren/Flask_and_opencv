@@ -1,21 +1,26 @@
 from threading import Lock
 from app.models.image_pack import ImagePack
 
+PADRONIZED_HEIGHT = 480
+PADRONIZED_WIDTH = 640
+PADRONIZED_SIZE = (PADRONIZED_HEIGHT, PADRONIZED_WIDTH) # resolução que não precisa de redimensionamento
+MAX_IMAGE_WIDTH = 720 # tamano máximo (idealizado) para a imagem na tela
 
 class VideoCapture:
   def __init__(self):
     self._is_working = True
     self.video_capture = None
     self.lock_video = Lock()
-    self.proporcional_size = [480, 640]
-  
+    self.proporcional_size = PADRONIZED_SIZE
+    print(self.proporcional_size)
+    
 
   def start_video(self, port):
     if not self.is_valid() or not self.is_working():
       self.start_video_stream(port)
       self.define_resolution()
       self.set_working_state(True)
-  
+
 
   def is_valid(self):
     with self.lock_video:
@@ -35,10 +40,11 @@ class VideoCapture:
   def define_resolution(self):
     with self.lock_video:
       h, w = ImagePack.force_max_resolution(self.video_capture)
-      if h <= 480 and w <= 640:
-        return
-      proportion = 720 / w
-      self.proporcional_size = (int(h * proportion), int(w * proportion))
+      if h <= PADRONIZED_HEIGHT and w <= PADRONIZED_WIDTH:
+        self.proporcional_size = (int(h), int(w))
+      else:
+        proportion = MAX_IMAGE_WIDTH / w
+        self.proporcional_size = (int(h * proportion), int(w * proportion))
 
 
   def set_working_state(self, condition = True):
@@ -50,7 +56,8 @@ class VideoCapture:
     h, w = self.proporcional_size
     _ = self.capture_frame() # Necessário para verificação do funcionamento
     success = self.is_working()
-    return (h, w, success)
+    return {'style': f'height:{h}px;min-height:{h}px;width:{w}px;min-width:{w}px;',
+        'success': success}
   
 
   def capture_frame(self):
@@ -70,14 +77,16 @@ class VideoCapture:
   
 
   def _resize_capture(self, frame):
-    if(self.video_capture.get(3) <= 640 and self.video_capture.get(4) <= 480):
+    ok_width = self.video_capture.get(3) <= PADRONIZED_WIDTH
+    ok_height = self.video_capture.get(4) <= PADRONIZED_HEIGHT
+    if(ok_width and ok_height):
       return frame
     return ImagePack.resize_image(frame, self.proporcional_size)
-
+  
 
   def change(self, new_port):
     try:
-      _change_video(new_port)
+      return self._change_video(new_port)
     except:
       return ''
   

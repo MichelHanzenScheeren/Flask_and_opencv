@@ -9,11 +9,11 @@ def configure_routes(app, webcam):
     try:
       webcam.init_webcam()
       return render_template('index.html', page='index', 
-        video_status=webcam.video_status(), webcans_list=webcam.webcans_list())
+          video_status=webcam.video_status_and_port(), webcans_list=webcam.webcans_list())
     except Exception as exception:
       print(exception)
       return redirect(url_for('error'))
-
+  
 
   @app.route('/play_webcam')
   def play_webcam():
@@ -44,10 +44,3 @@ def configure_routes(app, webcam):
   def change_current_webcam(index_webcam=None):
     return webcam.change_current_webcam(index_webcam)
   
-
-  @app.route('/teste', methods = ['POST'])
-  def teste():
-    print("DEU CERTOO")
-    return ''
-
-

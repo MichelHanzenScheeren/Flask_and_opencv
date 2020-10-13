@@ -57,9 +57,10 @@ function clearAuxValues() {
 function draw() {
   try {
     parseIntValues();
+    let invalid_values = rect.w == NaN || rect.h == NaN;
     let invalid_width = (rect.startX - (rect.startX + rect.w)) == 0;
     let invalid_height = (rect.startY - (rect.startY + rect.h)) == 0;
-    if(invalid_width || invalid_height) {
+    if(invalid_values || invalid_width || invalid_height) {
       invalidRectangle();
     } else {
       let url = '{{url_for("get_measures")}}';

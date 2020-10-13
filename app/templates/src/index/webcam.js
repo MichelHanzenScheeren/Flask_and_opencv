@@ -44,6 +44,7 @@ async function changeCurrentWebcam () {
   try {
     let select = document.getElementById('selectCurrentWebcam');
     let response = await axios.post(`{{url_for("change_current_webcam")}}/${select.value}`);
+    console.log(response);
     if(response == '' || response.data['success'] == false) {
       messageInvalidWebcam();
     } else {
